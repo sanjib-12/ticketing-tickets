@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 // This defines a TypeScript interface that specifies the shape of attributes required to create a new ticket. It enforces type safety when creating ticket objects.
 
@@ -8,12 +9,12 @@ interface TicketAttrs {
    userId: string;
 }
 
-
-
 interface TicketDoc extends mongoose.Document{
    title: string;
    price: number;
    userId: string;
+   version: number;
+   orderId?: string;
 }
 
 interface TicketModel extends mongoose.Model<TicketDoc>{
@@ -32,6 +33,9 @@ const ticketsSchema = new mongoose.Schema({
    userId:{
       type: String,
       required: true
+   },
+   orderId:{
+      type: String,
    }
 },
 {
@@ -43,6 +47,10 @@ const ticketsSchema = new mongoose.Schema({
    }
 }
 );
+
+ticketsSchema.set('versionKey', 'version');
+
+ticketsSchema.plugin(updateIfCurrentPlugin);
 
 ticketsSchema.statics.build = (attrs: TicketAttrs) => {
    return new Ticket(attrs);
